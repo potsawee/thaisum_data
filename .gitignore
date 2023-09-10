@@ -1,0 +1,7 @@
+LOGs/
+.ipynb_checkpoints/
+experiments/csebuetnlp/
+experiments/CrossSum_En2Th_outputs/
+translated_texts/
+cmd/run_nllb_translate_engsum_test.sh
+cmd/run_nllb_translate_engsum_valid.sh

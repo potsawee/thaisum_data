@@ -40,7 +40,7 @@ def main(
         outpath = "{}/{}_{}.json".format(output_dir, id_chunk[0], id_chunk[-1])
         exist = os.path.isfile(outpath)
         if exist:
-            print("id {}: already exists".format(idx))
+            print("outpath {}: already exists".format(outpath))
             continue
         translated_texts = {}
         for idx in id_chunk:
