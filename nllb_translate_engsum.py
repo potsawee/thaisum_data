@@ -3,7 +3,7 @@ import argparse
 import random
 import json
 import torch
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, M2M100ForConditionalGeneration
 from datasets import load_dataset
 
 def chunks(lst, n):
@@ -15,7 +15,7 @@ def main(
     translation_model, # e.g. facebook/nllb-200-3.3B
     dataset,           # e.g. xsum
     data_split,        # e.g. train, validation, test
-    data_type,         # e.g. summary, article
+    data_type,         # e.g. summary, document
     max_length,        # default 1024
     cache_batch_size,  # default 1000
     output_dir,
@@ -23,7 +23,9 @@ def main(
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     tokenizer = AutoTokenizer.from_pretrained(translation_model)
-    model = AutoModelForSeq2SeqLM.from_pretrained(translation_model)
+    # using context manager to allow fast loading: https://github.com/huggingface/transformers/issues/21913 (torch2.0 and above)
+    with torch.device("cuda"):
+        model = M2M100ForConditionalGeneration.from_pretrained(translation_model)
     model = model.eval()
     model = model.to(device)
     print("loaded:", translation_model)
@@ -47,7 +49,11 @@ def main(
             source = dataset[idx][data_type]
             bbcid = dataset[idx]['id'] # quick hack
 
-            inputs = tokenizer(source, return_tensors="pt").to(device)
+            inputs = tokenizer(
+                source, return_tensors="pt",
+                truncation=True, max_length=max_length,
+            ).to(device)
+            
             translated_tokens = model.generate(
                 **inputs, forced_bos_token_id=tokenizer.lang_code_to_id["tha_Thai"], max_length=max_length,
             )
