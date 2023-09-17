@@ -24,8 +24,8 @@ def main(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     tokenizer = AutoTokenizer.from_pretrained(translation_model)
     # using context manager to allow fast loading: https://github.com/huggingface/transformers/issues/21913 (torch2.0 and above)
-    with torch.device("cuda"):
-        model = M2M100ForConditionalGeneration.from_pretrained(translation_model)
+    # with torch.device("cuda"):
+    model = M2M100ForConditionalGeneration.from_pretrained(translation_model)
     model = model.eval()
     model = model.to(device)
     print("loaded:", translation_model)
@@ -53,9 +53,15 @@ def main(
                 source, return_tensors="pt",
                 truncation=True, max_length=max_length,
             ).to(device)
-            
+
             translated_tokens = model.generate(
-                **inputs, forced_bos_token_id=tokenizer.lang_code_to_id["tha_Thai"], max_length=max_length,
+                **inputs,
+                forced_bos_token_id=tokenizer.lang_code_to_id["tha_Thai"],
+                max_length=max_length,
+                # added params (13 Sep 2023)
+                num_beams=4,
+                no_repeat_ngram_size=6,
+                repetition_penalty=1.2, # recommended by https://arxiv.org/pdf/1909.05858.pdf
             )
             translated_text = tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0]
             translated_texts[idx] = {'text': translated_text, 'id': bbcid}
