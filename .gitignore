@@ -9,4 +9,8 @@ cmd/ampere*
 cmd/cpu*
 cmd/run_nllb_translate_*
 cmd/run_nllb_translate_summary_*
+cmd/cnndm/
+cmd/xsum/
 notebooks/translated_document_EDA.ipynb
+experiments/Combine_Translated_CNNDM_v2.ipynb
+experiments/Combine_Translated_XSum_v2.ipynb

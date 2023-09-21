@@ -15,7 +15,7 @@ def main(
     translation_model, # e.g. facebook/nllb-200-3.3B
     dataset,           # e.g. xsum
     data_split,        # e.g. train, validation, test
-    data_type,         # e.g. summary, document
+    data_type,         # e.g. (xsum = summary, document), (cnndm = article, hightlights)
     max_length,        # default 1024
     cache_batch_size,  # default 1000
     output_dir,
@@ -30,7 +30,11 @@ def main(
     model = model.to(device)
     print("loaded:", translation_model)
 
-    dataset = load_dataset(dataset)[data_split]
+    if dataset == "xsum":
+        dataset = load_dataset(dataset)[data_split]
+    elif dataset == "cnndm":
+        dataset = load_dataset('cnn_dailymail', '3.0.0')[data_split]
+
     ids = [i for i in range(len(dataset))]
     id_chunks = list(chunks(ids, cache_batch_size))
     num_chunks = len(id_chunks)
